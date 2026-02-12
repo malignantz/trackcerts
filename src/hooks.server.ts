@@ -7,6 +7,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const env = getServerEnv();
 
 	event.locals.supabase = createServerClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
+		global: {
+			fetch: event.fetch
+		},
 		cookies: {
 			getAll: () => event.cookies.getAll(),
 			setAll: (cookiesToSet) => {

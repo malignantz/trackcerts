@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	sendMagicLink: async ({ request }) => {
+	sendMagicLink: async ({ request, fetch }) => {
 		const formData = await request.formData();
 		const parsed = magicLinkEmailSchema.safeParse({
 			email: formData.get('email')
@@ -44,6 +44,9 @@ export const actions: Actions = {
 			auth: {
 				autoRefreshToken: false,
 				persistSession: false
+			},
+			global: {
+				fetch
 			}
 		});
 
@@ -69,7 +72,7 @@ export const actions: Actions = {
 			email: parsed.data.email
 		};
 	},
-	generateDevLink: async ({ request }) => {
+	generateDevLink: async ({ request, fetch }) => {
 		if (!isDevLoginLinksEnabled()) {
 			return fail(403, {
 				error: 'Dev login link generation is disabled.'
@@ -93,6 +96,9 @@ export const actions: Actions = {
 			auth: {
 				autoRefreshToken: false,
 				persistSession: false
+			},
+			global: {
+				fetch
 			}
 		});
 
