@@ -1,0 +1,5 @@
+# Ignore markdown docs by default
+*.md
+
+# Keep the project README visible
+!README.md
