@@ -2,11 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
 import { resolveAppAccess } from '$lib/server/auth/access-policy';
-import {
-	canUserBootstrapOrganization,
-	getActiveMembershipForUser,
-	upsertUserProfile
-} from '$lib/server/auth/memberships';
+import { canUserBootstrapOrganization, upsertUserProfile } from '$lib/server/auth/memberships';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const isOnboardingPath = url.pathname.startsWith('/app/onboarding');
@@ -21,7 +17,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		await upsertUserProfile(locals.user.id, locals.user.email);
 	}
 
-	const membership = await getActiveMembershipForUser(locals.user.id);
+	const membership = locals.membership;
 	locals.membership = membership;
 
 	const access = resolveAppAccess({

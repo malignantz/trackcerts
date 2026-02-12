@@ -34,8 +34,8 @@ TrackCerts manages certification workflows for medical organizations with strict
 ## Request lifecycle
 
 1. Incoming request initializes Supabase server client in hooks.
-2. Protected app layout verifies user session.
-3. Membership resolution gates access and sets org context in `locals.membership`.
+2. Hooks resolve authenticated user session and pre-load active membership into `locals.membership`.
+3. Protected app layout verifies user session and applies route-level access policy.
 4. Authenticated users without membership are redirected to onboarding guidance.
 5. Onboarding creation is allowed only while organization bootstrap is open (first-org creation).
 6. Route actions run Zod validation and execute org-scoped DB writes.

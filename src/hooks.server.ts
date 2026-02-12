@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import type { Handle } from '@sveltejs/kit';
 
+import { getActiveMembershipForUser } from '$lib/server/auth/memberships';
 import { getServerEnv } from '$lib/server/env';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -44,7 +45,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const { session, user } = await event.locals.safeGetSession();
 	event.locals.session = session;
 	event.locals.user = user;
-	event.locals.membership = null;
+	event.locals.membership = user ? await getActiveMembershipForUser(user.id) : null;
 
 	return resolve(event, {
 		filterSerializedResponseHeaders: (name) =>
