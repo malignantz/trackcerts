@@ -15,6 +15,20 @@ export default [
 	},
 	js.configs.recommended,
 	{
+		files: ['scripts/**/*.mjs'],
+		languageOptions: {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
+			globals: {
+				process: 'readonly',
+				console: 'readonly'
+			}
+		},
+		rules: {
+			'no-console': 'off'
+		}
+	},
+	{
 		files: ['**/*.ts'],
 		languageOptions: {
 			parser: tsParser,

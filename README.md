@@ -49,10 +49,26 @@ npm install
 docker compose up -d
 npm run db:generate
 npm run db:push
+npm run db:seed
 npm run dev
 ```
 
 If you already run Postgres elsewhere, skip `docker compose up -d` and set `DATABASE_URL` in `.env`.
+
+### Demo seed data
+
+Run the seed script any time to ensure demo data exists (idempotent):
+
+```bash
+npm run db:seed
+```
+
+Optional environment overrides:
+
+- `SEED_ORGANIZATION_NAME`
+- `SEED_ORGANIZATION_SLUG`
+- `SEED_OWNER_USER_ID` (binds org owner membership to a specific Supabase user id)
+- `SEED_OWNER_EMAIL`
 
 ## Quality checks
 

@@ -18,7 +18,8 @@
 		"test:integration": "vitest run src/routes",
 		"test:e2e": "playwright test",
 		"db:generate": "drizzle-kit generate",
-		"db:push": "drizzle-kit push"
+		"db:push": "drizzle-kit push",
+		"db:seed": "node scripts/seed.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.2",
