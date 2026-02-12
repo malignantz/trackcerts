@@ -48,7 +48,7 @@ Copy `.env.example` to `.env` and fill:
 In Supabase Dashboard -> Authentication -> URL Configuration:
 
 - Set **Site URL** to your app origin (for local dev: `http://localhost:5173`)
-- Add **Redirect URL**: `http://localhost:5173/auth/callback`
+- Add **Redirect URL**: `http://localhost:5173/auth/confirm`
 
 Without this, magic links can fail or redirect incorrectly.
 
@@ -118,6 +118,7 @@ npm run db:push
 ## Key routes
 
 - `/login`
+- `/auth/confirm`
 - `/app/onboarding`
 - `/app/staff`
 - `/app/staff/new`

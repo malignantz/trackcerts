@@ -1,7 +1,6 @@
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-import { logAccessDenied } from '$lib/server/audit/logger';
 import { resolveAppAccess } from '$lib/server/auth/access-policy';
 import {
 	canUserBootstrapOrganization,
@@ -42,16 +41,6 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 
 	if (access === 'redirect_to_staff') {
 		throw redirect(303, '/app/staff');
-	}
-
-	if (access === 'deny_missing_membership') {
-		await logAccessDenied({
-			actorId: locals.user?.id,
-			organizationId: null,
-			path: url.pathname,
-			reason: 'missing_membership'
-		});
-		throw error(403, 'Your account is not assigned to an organization.');
 	}
 
 	return {

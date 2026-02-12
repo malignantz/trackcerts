@@ -2,6 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 import { canUserBootstrapOrganization } from '$lib/server/auth/memberships';
+import { logAccessDenied } from '$lib/server/audit/logger';
+import { isUniqueViolation } from '$lib/server/db/errors';
 import { createOrganizationForOwner, organizationSlugExists } from '$lib/server/org/service';
 import { deriveOrganizationSlug, normalizeOrganizationSlug } from '$lib/server/org/slug';
 import { createOrganizationSchema } from '$lib/validation/organization';
@@ -23,13 +25,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
+	default: async ({ request, locals, url }) => {
 		if (!locals.user?.email) {
 			throw redirect(303, '/login');
 		}
 
 		const canBootstrap = await canUserBootstrapOrganization();
 		if (!canBootstrap) {
+			await logAccessDenied({
+				actorId: locals.user.id,
+				organizationId: null,
+				path: url.pathname,
+				reason: 'bootstrap_closed'
+			});
+
 			return fail(403, {
 				error: 'An organization already exists. Ask an owner to add your account.'
 			});
@@ -68,12 +77,24 @@ export const actions: Actions = {
 			});
 		}
 
-		await createOrganizationForOwner({
-			userId: locals.user.id,
-			email: locals.user.email,
-			name: parsed.data.name,
-			slug: candidateSlug
-		});
+		try {
+			await createOrganizationForOwner({
+				userId: locals.user.id,
+				email: locals.user.email,
+				name: parsed.data.name,
+				slug: candidateSlug
+			});
+		} catch (error) {
+			if (isUniqueViolation(error, 'organizations_slug_unique')) {
+				return fail(409, {
+					error: 'That organization slug is already in use.',
+					name: parsed.data.name,
+					slug: candidateSlug
+				});
+			}
+
+			throw error;
+		}
 
 		throw redirect(303, '/app/staff');
 	}

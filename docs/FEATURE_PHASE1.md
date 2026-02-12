@@ -5,7 +5,8 @@
 1. Manager authentication (`/login`)
 
 - Email magic-link initiation.
-- Auth callback session exchange (`/auth/callback`).
+- Client confirmation route for magic-link hash tokens (`/auth/confirm`).
+- Server callback verification for token-hash links (`/auth/callback`).
 
 2. First-user organization bootstrap (`/app/onboarding`)
 

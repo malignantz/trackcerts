@@ -36,7 +36,7 @@ describe('resolveAppAccess', () => {
 		).toBe('redirect_to_staff');
 	});
 
-	it('denies onboarding for unassigned users after bootstrap', () => {
+	it('allows onboarding view for unassigned users after bootstrap', () => {
 		expect(
 			resolveAppAccess({
 				hasUser: true,
@@ -44,6 +44,6 @@ describe('resolveAppAccess', () => {
 				canBootstrap: false,
 				isOnboardingPath: true
 			})
-		).toBe('deny_missing_membership');
+		).toBe('allow');
 	});
 });

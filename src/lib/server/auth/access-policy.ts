@@ -2,8 +2,7 @@ export type AppAccessDecision =
 	| 'redirect_login'
 	| 'redirect_to_onboarding'
 	| 'redirect_to_staff'
-	| 'allow'
-	| 'deny_missing_membership';
+	| 'allow';
 
 interface ResolveAppAccessInput {
 	hasUser: boolean;
@@ -30,7 +29,7 @@ export function resolveAppAccess(input: ResolveAppAccessInput): AppAccessDecisio
 	}
 
 	if (!input.hasMembership && input.isOnboardingPath && !input.canBootstrap) {
-		return 'deny_missing_membership';
+		return 'allow';
 	}
 
 	return 'redirect_to_onboarding';

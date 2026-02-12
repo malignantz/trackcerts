@@ -27,6 +27,7 @@ TrackCerts manages certification workflows for medical organizations with strict
 2. Protected app layout verifies user session.
 3. Membership resolution gates access and sets org context.
 4. Route actions run Zod validation and execute org-scoped DB writes.
+5. Authenticated users without membership are routed to onboarding guidance, but cannot bootstrap once an organization already exists.
 
 ## Security baseline
 

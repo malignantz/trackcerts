@@ -7,6 +7,7 @@ import {
 	setCertificationTypeActive,
 	updateCertificationType
 } from '$lib/server/org/certification-types';
+import { isUniqueViolation } from '$lib/server/db/errors';
 import {
 	createCertificationTypeSchema,
 	toggleCertificationTypeSchema,
@@ -43,7 +44,19 @@ export const actions: Actions = {
 			});
 		}
 
-		await createCertificationType(locals.membership.organizationId, parsed.data);
+		try {
+			await createCertificationType(locals.membership.organizationId, parsed.data);
+		} catch (error) {
+			if (isUniqueViolation(error, 'certification_types_org_code_unique')) {
+				return fail(409, {
+					action: 'create',
+					error: 'That certification code already exists for this organization.'
+				});
+			}
+
+			throw error;
+		}
+
 		return { success: true };
 	},
 	update: async ({ request, locals }) => {
@@ -65,7 +78,19 @@ export const actions: Actions = {
 			});
 		}
 
-		await updateCertificationType(locals.membership.organizationId, parsed.data.id, parsed.data);
+		try {
+			await updateCertificationType(locals.membership.organizationId, parsed.data.id, parsed.data);
+		} catch (error) {
+			if (isUniqueViolation(error, 'certification_types_org_code_unique')) {
+				return fail(409, {
+					action: 'update',
+					error: 'That certification code already exists for this organization.'
+				});
+			}
+
+			throw error;
+		}
+
 		return { success: true };
 	},
 	toggle: async ({ request, locals }) => {

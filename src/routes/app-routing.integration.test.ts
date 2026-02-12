@@ -35,4 +35,15 @@ describe('app route access policy integration scenarios', () => {
 			})
 		).toBe('redirect_to_staff');
 	});
+
+	it('allows unaffiliated users to view onboarding guidance', () => {
+		expect(
+			resolveAppAccess({
+				hasUser: true,
+				hasMembership: false,
+				canBootstrap: false,
+				isOnboardingPath: true
+			})
+		).toBe('allow');
+	});
 });
