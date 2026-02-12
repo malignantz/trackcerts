@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { env as privateEnv } from '$env/dynamic/private';
 
 const serverEnvSchema = z.object({
 	SUPABASE_URL: z.url(),
@@ -25,7 +26,10 @@ export function getServerEnv(): ServerEnv {
 		return cachedEnv;
 	}
 
-	const parsed = serverEnvSchema.safeParse(process.env);
+	const parsed = serverEnvSchema.safeParse({
+		...process.env,
+		...privateEnv
+	});
 	if (!parsed.success) {
 		if (process.env.NODE_ENV === 'test') {
 			cachedEnv = testDefaults;
