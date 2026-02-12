@@ -26,6 +26,16 @@
 			>
 				Send magic link
 			</button>
+
+			{#if data?.devLoginLinksEnabled}
+				<button
+					type="submit"
+					formaction="?/generateDevLink"
+					class="w-full rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+				>
+					Generate dev login link
+				</button>
+			{/if}
 		</form>
 
 		{#if form?.error}
@@ -38,6 +48,15 @@
 
 		{#if form?.success}
 			<p class="mt-4 text-sm text-emerald-700">{form.message}</p>
+		{/if}
+
+		{#if form?.devLoginLink}
+			<div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+				<p class="text-sm font-medium text-amber-900">Dev login link (temporary)</p>
+				<a class="mt-2 block break-all text-sm text-amber-800 underline" href={form.devLoginLink}>
+					{form.devLoginLink}
+				</a>
+			</div>
 		{/if}
 	</div>
 </div>

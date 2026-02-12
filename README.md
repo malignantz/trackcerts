@@ -41,6 +41,7 @@ Copy `.env.example` to `.env` and fill:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `DATABASE_URL`
 - `APP_URL` (for auth callback URL)
+- `DEV_LOGIN_LINKS_ENABLED` (set `true` only for local development to enable direct link generation on `/login`)
 
 ### Supabase Auth settings required for magic links
 
@@ -50,6 +51,16 @@ In Supabase Dashboard -> Authentication -> URL Configuration:
 - Add **Redirect URL**: `http://localhost:5173/auth/callback`
 
 Without this, magic links can fail or redirect incorrectly.
+
+### Dev-only direct login links
+
+If email delivery is unreliable in local development, enable:
+
+```env
+DEV_LOGIN_LINKS_ENABLED=true
+```
+
+Then use **Generate dev login link** on `/login`. This is disabled in production by code guard.
 
 ## Local development
 
