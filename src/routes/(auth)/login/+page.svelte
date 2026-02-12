@@ -8,7 +8,7 @@
 		<h1 class="mb-2 text-3xl font-bold text-slate-900">Manager Sign In</h1>
 		<p class="mb-8 text-slate-600">Use your email and we will send a secure magic link.</p>
 
-		<form method="POST" class="space-y-4">
+		<form method="POST" action="?/sendMagicLink" class="space-y-4">
 			<label class="block">
 				<span class="mb-1 block text-sm font-medium text-slate-700">Email address</span>
 				<input

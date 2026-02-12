@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	sendMagicLink: async ({ request }) => {
 		const formData = await request.formData();
 		const parsed = magicLinkEmailSchema.safeParse({
 			email: formData.get('email')
