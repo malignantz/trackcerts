@@ -1,6 +1,7 @@
 export type AppAccessDecision =
 	| 'redirect_login'
-	| 'redirect_onboarding'
+	| 'redirect_to_onboarding'
+	| 'redirect_to_staff'
 	| 'allow'
 	| 'deny_missing_membership';
 
@@ -17,7 +18,7 @@ export function resolveAppAccess(input: ResolveAppAccessInput): AppAccessDecisio
 	}
 
 	if (input.hasMembership && input.isOnboardingPath) {
-		return 'redirect_onboarding';
+		return 'redirect_to_staff';
 	}
 
 	if (input.hasMembership) {
@@ -32,5 +33,5 @@ export function resolveAppAccess(input: ResolveAppAccessInput): AppAccessDecisio
 		return 'deny_missing_membership';
 	}
 
-	return 'redirect_onboarding';
+	return 'redirect_to_onboarding';
 }

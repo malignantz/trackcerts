@@ -11,7 +11,7 @@ describe('app route access policy integration scenarios', () => {
 				canBootstrap: true,
 				isOnboardingPath: false
 			})
-		).toBe('redirect_onboarding');
+		).toBe('redirect_to_onboarding');
 	});
 
 	it('allows authenticated users with memberships on app routes', () => {
@@ -33,6 +33,6 @@ describe('app route access policy integration scenarios', () => {
 				canBootstrap: false,
 				isOnboardingPath: true
 			})
-		).toBe('redirect_onboarding');
+		).toBe('redirect_to_staff');
 	});
 });

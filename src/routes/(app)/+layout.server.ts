@@ -36,8 +36,12 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		throw redirect(303, '/login');
 	}
 
-	if (access === 'redirect_onboarding') {
+	if (access === 'redirect_to_onboarding') {
 		throw redirect(303, '/app/onboarding');
+	}
+
+	if (access === 'redirect_to_staff') {
+		throw redirect(303, '/app/staff');
 	}
 
 	if (access === 'deny_missing_membership') {

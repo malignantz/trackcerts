@@ -25,6 +25,17 @@ describe('resolveAppAccess', () => {
 		).toBe('allow');
 	});
 
+	it('redirects members away from onboarding to staff', () => {
+		expect(
+			resolveAppAccess({
+				hasUser: true,
+				hasMembership: true,
+				canBootstrap: false,
+				isOnboardingPath: true
+			})
+		).toBe('redirect_to_staff');
+	});
+
 	it('denies onboarding for unassigned users after bootstrap', () => {
 		expect(
 			resolveAppAccess({

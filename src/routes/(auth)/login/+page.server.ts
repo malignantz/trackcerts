@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { dev } from '$app/environment';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -14,6 +15,10 @@ function mapAuthErrorMessage(message: string, code?: string): string {
 	return message;
 }
 
+function resolveAuthOrigin(urlOrigin: string, appUrl: string): string {
+	return dev ? urlOrigin : appUrl;
+}
+
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.user) {
 		throw redirect(303, '/app/staff');
@@ -26,7 +31,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	sendMagicLink: async ({ request, fetch }) => {
+	sendMagicLink: async ({ request, fetch, url }) => {
 		const formData = await request.formData();
 		const parsed = magicLinkEmailSchema.safeParse({
 			email: formData.get('email')
@@ -50,7 +55,8 @@ export const actions: Actions = {
 			}
 		});
 
-		const redirectTo = `${env.APP_URL}/auth/callback`;
+		const redirectOrigin = resolveAuthOrigin(url.origin, env.APP_URL);
+		const redirectTo = `${redirectOrigin}/auth/confirm`;
 		const { error } = await authClient.auth.signInWithOtp({
 			email: parsed.data.email,
 			options: {
@@ -72,7 +78,7 @@ export const actions: Actions = {
 			email: parsed.data.email
 		};
 	},
-	generateDevLink: async ({ request, fetch }) => {
+	generateDevLink: async ({ request, fetch, url }) => {
 		if (!isDevLoginLinksEnabled()) {
 			return fail(403, {
 				error: 'Dev login link generation is disabled.'
@@ -102,7 +108,8 @@ export const actions: Actions = {
 			}
 		});
 
-		const redirectTo = `${env.APP_URL}/auth/callback`;
+		const redirectOrigin = resolveAuthOrigin(url.origin, env.APP_URL);
+		const redirectTo = `${redirectOrigin}/auth/callback`;
 		const { data, error } = await adminClient.auth.admin.generateLink({
 			type: 'magiclink',
 			email: parsed.data.email,
@@ -118,11 +125,17 @@ export const actions: Actions = {
 			});
 		}
 
+		const hashedToken = data.properties.hashed_token;
+		const safeType = data.properties.verification_type ?? 'magiclink';
+		const devLoginLink = hashedToken
+			? `${redirectOrigin}/auth/callback?type=${encodeURIComponent(safeType)}&token_hash=${encodeURIComponent(hashedToken)}`
+			: data.properties.action_link;
+
 		return {
 			success: true,
 			message: 'Dev login link generated.',
 			email: parsed.data.email,
-			devLoginLink: data.properties.action_link
+			devLoginLink
 		};
 	}
 };
