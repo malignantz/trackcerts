@@ -46,9 +46,13 @@ Copy `.env.example` to `.env` and fill:
 
 ```bash
 npm install
+docker compose up -d
 npm run db:generate
+npm run db:push
 npm run dev
 ```
+
+If you already run Postgres elsewhere, skip `docker compose up -d` and set `DATABASE_URL` in `.env`.
 
 ## Quality checks
 
