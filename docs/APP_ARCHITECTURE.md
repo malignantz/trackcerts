@@ -13,24 +13,35 @@ TrackCerts manages certification workflows for medical organizations with strict
 
 2. Auth layer (Supabase)
 
-- Magic-link login.
-- Session hydration in `src/hooks.server.ts`.
+- Magic-link login initiation on `/login`.
+- Client-side auth confirmation for email hash-token links on `/auth/confirm`.
+- Server callback verification for token-hash and code flows on `/auth/callback`.
+- Session exchange endpoint on `/auth/session`.
+- Session hydration and user resolution in `src/hooks.server.ts`.
 
 3. Data layer (Postgres + Drizzle)
 
 - Multi-org schema with memberships and org-scoped resources.
 - Async pipeline tables for future worker phases.
 
+## Route and tenancy model
+
+- `/(auth)` routes are public (`/login`, auth callbacks).
+- `/(app)` routes are protected in `src/routes/(app)/+layout.server.ts`.
+- Tenant context is always derived from active membership server-side.
+- Client payloads never supply trusted `organization_id`; all writes use membership-derived org context.
+
 ## Request lifecycle
 
 1. Incoming request initializes Supabase server client in hooks.
 2. Protected app layout verifies user session.
-3. Membership resolution gates access and sets org context.
-4. Route actions run Zod validation and execute org-scoped DB writes.
-5. Authenticated users without membership are routed to onboarding guidance, but cannot bootstrap once an organization already exists.
+3. Membership resolution gates access and sets org context in `locals.membership`.
+4. Authenticated users without membership are redirected to onboarding guidance.
+5. Onboarding creation is allowed only while organization bootstrap is open (first-org creation).
+6. Route actions run Zod validation and execute org-scoped DB writes.
 
 ## Security baseline
 
 - Org IDs are never trusted from client payloads.
 - Membership-derived org context controls all app writes.
-- Access-denied events are captured in `audit_logs`.
+- Access-denied events are captured in `audit_logs` (for example, blocked bootstrap attempts).
