@@ -1,5 +1,30 @@
-# Ignore markdown docs by default
-*.md
+node_modules
 
-# Keep the project README visible
-!README.md
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+/playwright-report
+/test-results
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Local planning docs kept off remote
+APP_WIDE_OVERVIEW.md
+FEATURE_OVERVIEW.md
+PROJECT_PLAN.md

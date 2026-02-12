@@ -1,0 +1,141 @@
+import { createClient } from '@supabase/supabase-js';
+import { dev } from '$app/environment';
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+
+import { isDevLoginLinksEnabled } from '$lib/server/auth/dev-login';
+import { getServerEnv } from '$lib/server/env';
+import { magicLinkEmailSchema } from '$lib/validation/auth';
+
+function mapAuthErrorMessage(message: string, code?: string): string {
+	if (code === 'over_email_send_rate_limit') {
+		return 'Too many magic-link requests. Wait a minute and try again.';
+	}
+
+	return message;
+}
+
+function resolveAuthOrigin(urlOrigin: string, appUrl: string): string {
+	return dev ? urlOrigin : appUrl;
+}
+
+export const load: PageServerLoad = async ({ locals, url }) => {
+	if (locals.user) {
+		throw redirect(303, '/app/staff');
+	}
+
+	return {
+		loginError: url.searchParams.get('error'),
+		devLoginLinksEnabled: isDevLoginLinksEnabled()
+	};
+};
+
+export const actions: Actions = {
+	sendMagicLink: async ({ request, fetch, url }) => {
+		const formData = await request.formData();
+		const parsed = magicLinkEmailSchema.safeParse({
+			email: formData.get('email')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				error: parsed.error.issues[0]?.message ?? 'Invalid email address',
+				email: String(formData.get('email') ?? '')
+			});
+		}
+
+		const env = getServerEnv();
+		const authClient = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			},
+			global: {
+				fetch
+			}
+		});
+
+		const redirectOrigin = resolveAuthOrigin(url.origin, env.APP_URL);
+		const redirectTo = `${redirectOrigin}/auth/confirm`;
+		const { error } = await authClient.auth.signInWithOtp({
+			email: parsed.data.email,
+			options: {
+				shouldCreateUser: true,
+				emailRedirectTo: redirectTo
+			}
+		});
+
+		if (error) {
+			return fail(400, {
+				error: mapAuthErrorMessage(error.message, error.code),
+				email: parsed.data.email
+			});
+		}
+
+		return {
+			success: true,
+			message: 'Magic link sent. Check your inbox to continue.',
+			email: parsed.data.email
+		};
+	},
+	generateDevLink: async ({ request, fetch, url }) => {
+		if (!isDevLoginLinksEnabled()) {
+			return fail(403, {
+				error: 'Dev login link generation is disabled.'
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = magicLinkEmailSchema.safeParse({
+			email: formData.get('email')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				error: parsed.error.issues[0]?.message ?? 'Invalid email address',
+				email: String(formData.get('email') ?? '')
+			});
+		}
+
+		const env = getServerEnv();
+		const adminClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			},
+			global: {
+				fetch
+			}
+		});
+
+		const redirectOrigin = resolveAuthOrigin(url.origin, env.APP_URL);
+		const redirectTo = `${redirectOrigin}/auth/callback`;
+		const { data, error } = await adminClient.auth.admin.generateLink({
+			type: 'magiclink',
+			email: parsed.data.email,
+			options: {
+				redirectTo
+			}
+		});
+
+		if (error) {
+			return fail(400, {
+				error: mapAuthErrorMessage(error.message, error.code),
+				email: parsed.data.email
+			});
+		}
+
+		const hashedToken = data.properties.hashed_token;
+		const safeType = data.properties.verification_type ?? 'magiclink';
+		const devLoginLink = hashedToken
+			? `${redirectOrigin}/auth/callback?type=${encodeURIComponent(safeType)}&token_hash=${encodeURIComponent(hashedToken)}`
+			: data.properties.action_link;
+
+		return {
+			success: true,
+			message: 'Dev login link generated.',
+			email: parsed.data.email,
+			devLoginLink
+		};
+	}
+};
