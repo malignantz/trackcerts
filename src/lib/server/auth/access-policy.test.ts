@@ -1,0 +1,38 @@
+import { describe, expect, it } from 'vitest';
+
+import { resolveAppAccess } from './access-policy';
+
+describe('resolveAppAccess', () => {
+	it('redirects unauthenticated users to login', () => {
+		expect(
+			resolveAppAccess({
+				hasUser: false,
+				hasMembership: false,
+				canBootstrap: false,
+				isOnboardingPath: false
+			})
+		).toBe('redirect_login');
+	});
+
+	it('allows first user to access onboarding', () => {
+		expect(
+			resolveAppAccess({
+				hasUser: true,
+				hasMembership: false,
+				canBootstrap: true,
+				isOnboardingPath: true
+			})
+		).toBe('allow');
+	});
+
+	it('denies onboarding for unassigned users after bootstrap', () => {
+		expect(
+			resolveAppAccess({
+				hasUser: true,
+				hasMembership: false,
+				canBootstrap: false,
+				isOnboardingPath: true
+			})
+		).toBe('deny_missing_membership');
+	});
+});

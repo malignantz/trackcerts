@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+:root {
+	--bg: #f3f5f7;
+	--surface: #ffffff;
+	--ink: #12263a;
+	--muted: #577590;
+	--accent: #1c7c54;
+	--line: #dbe4ea;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+	background: radial-gradient(circle at top left, #ffffff 0%, var(--bg) 65%);
+	color: var(--ink);
+	min-height: 100%;
+}
+
+a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+input,
+button,
+select {
+	font: inherit;
+}
