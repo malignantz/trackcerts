@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { form } = $props();
+	let { data, form } = $props();
 </script>
 
 <div class="min-h-screen p-6 md:p-12">
@@ -30,6 +30,10 @@
 
 		{#if form?.error}
 			<p class="mt-4 text-sm text-red-700">{form.error}</p>
+		{/if}
+
+		{#if data?.loginError}
+			<p class="mt-4 text-sm text-red-700">{data.loginError}</p>
 		{/if}
 
 		{#if form?.success}

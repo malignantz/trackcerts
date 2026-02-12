@@ -42,6 +42,15 @@ Copy `.env.example` to `.env` and fill:
 - `DATABASE_URL`
 - `APP_URL` (for auth callback URL)
 
+### Supabase Auth settings required for magic links
+
+In Supabase Dashboard -> Authentication -> URL Configuration:
+
+- Set **Site URL** to your app origin (for local dev: `http://localhost:5173`)
+- Add **Redirect URL**: `http://localhost:5173/auth/callback`
+
+Without this, magic links can fail or redirect incorrectly.
+
 ## Local development
 
 ```bash

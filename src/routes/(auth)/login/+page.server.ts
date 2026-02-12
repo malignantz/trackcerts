@@ -5,12 +5,22 @@ import type { Actions, PageServerLoad } from './$types';
 import { getServerEnv } from '$lib/server/env';
 import { magicLinkEmailSchema } from '$lib/validation/auth';
 
-export const load: PageServerLoad = async ({ locals }) => {
+function mapAuthErrorMessage(message: string, code?: string): string {
+	if (code === 'over_email_send_rate_limit') {
+		return 'Too many magic-link requests. Wait a minute and try again.';
+	}
+
+	return message;
+}
+
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.user) {
 		throw redirect(303, '/app/staff');
 	}
 
-	return {};
+	return {
+		loginError: url.searchParams.get('error')
+	};
 };
 
 export const actions: Actions = {
@@ -39,13 +49,14 @@ export const actions: Actions = {
 		const { error } = await authClient.auth.signInWithOtp({
 			email: parsed.data.email,
 			options: {
+				shouldCreateUser: true,
 				emailRedirectTo: redirectTo
 			}
 		});
 
 		if (error) {
 			return fail(400, {
-				error: error.message,
+				error: mapAuthErrorMessage(error.message, error.code),
 				email: parsed.data.email
 			});
 		}
