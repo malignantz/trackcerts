@@ -18,7 +18,7 @@ function resolveConnectionConfig() {
 	const env = getServerEnv();
 	const isLocalDevMode = process.env.NODE_ENV !== 'production' && env.DEV_DB_MODE === 'local';
 	const connectionString = isLocalDevMode
-		? env.LOCAL_DATABASE_URL ?? DEFAULT_LOCAL_DATABASE_URL
+		? (env.LOCAL_DATABASE_URL ?? DEFAULT_LOCAL_DATABASE_URL)
 		: env.DATABASE_URL;
 
 	return {

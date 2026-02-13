@@ -145,7 +145,9 @@ test('onboarding review queue shows middle column when imported middle names are
 	await expect(page.locator('input[name="rows.r1.middleName"]')).toHaveValue('');
 });
 
-test('onboarding offers to restore unsaved import from localStorage after reload', async ({ page }) => {
+test('onboarding offers to restore unsaved import from localStorage after reload', async ({
+	page
+}) => {
 	await page.goto('/e2e/bootstrap');
 	await expect(page).toHaveURL(/\/app\/onboarding\/staff$/);
 

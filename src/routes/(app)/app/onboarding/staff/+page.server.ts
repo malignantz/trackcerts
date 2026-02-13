@@ -5,7 +5,10 @@ import { FIXED_CERTIFICATION_CODES } from '$lib/certifications';
 import { setStaffOnboardingComplete } from '$lib/server/org/service';
 import { parseCommitRows } from '$lib/server/staff/import-commit';
 import { parseStaffImport } from '$lib/server/staff/import-parser';
-import { clearStaffForOrganizationTesting, importStaffRowsWithRequirements } from '$lib/server/staff/onboarding';
+import {
+	clearStaffForOrganizationTesting,
+	importStaffRowsWithRequirements
+} from '$lib/server/staff/onboarding';
 import { listStaff } from '$lib/server/staff/repository';
 import { importCommitSchema, importPreviewSchema } from '$lib/validation/requirements';
 import type { CertificationCode } from '$lib/types';
@@ -57,7 +60,9 @@ function parseDuplicateDecisions(formData: FormData): Record<string, 'yes' | 'no
 		} catch {
 			decoded = encoded;
 		}
-		const normalized = String(value ?? '').trim().toLowerCase();
+		const normalized = String(value ?? '')
+			.trim()
+			.toLowerCase();
 		decisions[decoded] = normalized === 'yes' ? 'yes' : 'no';
 	}
 	return decisions;

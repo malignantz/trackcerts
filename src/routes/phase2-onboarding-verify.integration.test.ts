@@ -137,7 +137,9 @@ describe.sequential('phase 2 onboarding and verify integration', () => {
 			success: true
 		});
 		expect((result as { detectedSourceType: string }).detectedSourceType).toBe('table_tsv');
-		expect((result as { pendingPatternDecisions: unknown[] }).pendingPatternDecisions).toHaveLength(0);
+		expect((result as { pendingPatternDecisions: unknown[] }).pendingPatternDecisions).toHaveLength(
+			0
+		);
 		const previewRows = (result as { previewRows: Array<Record<string, unknown>> }).previewRows;
 		expect(previewRows).toHaveLength(2);
 		expect(previewRows[0]).toMatchObject({
@@ -186,10 +188,11 @@ describe.sequential('phase 2 onboarding and verify integration', () => {
 			}
 		} as never);
 
-		expect((secondResult as { pendingPatternDecisions: unknown[] }).pendingPatternDecisions).toHaveLength(
-			0
-		);
-		const resolvedRows = (secondResult as { previewRows: Array<Record<string, unknown>> }).previewRows;
+		expect(
+			(secondResult as { pendingPatternDecisions: unknown[] }).pendingPatternDecisions
+		).toHaveLength(0);
+		const resolvedRows = (secondResult as { previewRows: Array<Record<string, unknown>> })
+			.previewRows;
 		expect(resolvedRows).toHaveLength(2);
 		expect(resolvedRows[0]).toMatchObject({
 			firstName: 'James',
@@ -239,10 +242,11 @@ describe.sequential('phase 2 onboarding and verify integration', () => {
 			}
 		} as never);
 
-		expect((secondResult as { pendingPatternDecisions: unknown[] }).pendingPatternDecisions).toHaveLength(
-			0
-		);
-		const resolvedRows = (secondResult as { previewRows: Array<Record<string, unknown>> }).previewRows;
+		expect(
+			(secondResult as { pendingPatternDecisions: unknown[] }).pendingPatternDecisions
+		).toHaveLength(0);
+		const resolvedRows = (secondResult as { previewRows: Array<Record<string, unknown>> })
+			.previewRows;
 		expect(resolvedRows).toHaveLength(3);
 		expect(resolvedRows[0]).toMatchObject({
 			firstName: 'James',

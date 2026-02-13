@@ -149,7 +149,9 @@ function detectSourceType(rawText: string): ImportSourceType {
 		return 'list_text';
 	}
 
-	const tabRows = lines.filter((line) => line.includes('\t') && line.split('\t').length >= 2).length;
+	const tabRows = lines.filter(
+		(line) => line.includes('\t') && line.split('\t').length >= 2
+	).length;
 	return tabRows / lines.length > 0.5 ? 'table_tsv' : 'list_text';
 }
 
@@ -234,15 +236,14 @@ function estimateMiddleColumn(rows: string[][], usedIndexes: Set<number>): numbe
 	}
 
 	for (const index of candidates) {
-		const values = rows
-			.map((row) => (row[index] ?? '').trim())
-			.filter((value) => Boolean(value));
+		const values = rows.map((row) => (row[index] ?? '').trim()).filter((value) => Boolean(value));
 		if (values.length === 0) {
 			continue;
 		}
 
 		const singleTokenRatio =
-			values.filter((value) => value.split(/\s+/).filter(Boolean).length <= 1).length / values.length;
+			values.filter((value) => value.split(/\s+/).filter(Boolean).length <= 1).length /
+			values.length;
 		if (singleTokenRatio >= 0.75) {
 			return index;
 		}
@@ -273,9 +274,9 @@ function buildRowPatternId(
 		return `${commaFlag}_${tokenBucket}`;
 	};
 
-	return `table_tsv:${firstColumnIndex}:${middleColumnIndex ?? 'none'}:${lastColumnIndex}:${
-		describeCell(firstCell)
-	}:${describeCell(lastCell)}`;
+	return `table_tsv:${firstColumnIndex}:${middleColumnIndex ?? 'none'}:${lastColumnIndex}:${describeCell(
+		firstCell
+	)}:${describeCell(lastCell)}`;
 }
 
 function parseSingleCellInTableRow(
@@ -508,7 +509,10 @@ function parseTableRows(input: ParseInput): StaffImportPreview {
 
 		firstColumnIndex = candidates[0] ?? -1;
 		lastColumnIndex = candidates[1] ?? -1;
-		middleColumnIndex = estimateMiddleColumn(parsedRows, new Set([firstColumnIndex, lastColumnIndex]));
+		middleColumnIndex = estimateMiddleColumn(
+			parsedRows,
+			new Set([firstColumnIndex, lastColumnIndex])
+		);
 
 		const pendingByPatternId = new Map<string, PendingPatternDecision>();
 		for (let rowIndex = 0; rowIndex < dataRows.length; rowIndex += 1) {
@@ -570,7 +574,8 @@ function parseTableRows(input: ParseInput): StaffImportPreview {
 		const rawRow = cells.join('\t');
 		const firstCellRaw = (cells[firstColumnIndex] ?? '').trim();
 		const lastCellRaw = (cells[lastColumnIndex] ?? '').trim();
-		const middleNameRaw = middleColumnIndex === null ? '' : cleanToken(cells[middleColumnIndex] ?? '');
+		const middleNameRaw =
+			middleColumnIndex === null ? '' : cleanToken(cells[middleColumnIndex] ?? '');
 		const middleName = middleNameRaw ? toTitleCase(middleNameRaw) : null;
 
 		if (!headerMapping) {
@@ -638,7 +643,9 @@ function parseTableRows(input: ParseInput): StaffImportPreview {
 			lastName,
 			requiredCertCodes: input.requiredCertCodes,
 			confidence:
-				!headerMapping && firstCellRaw.includes(',') !== lastCellRaw.includes(',') ? 0.92 : confidence
+				!headerMapping && firstCellRaw.includes(',') !== lastCellRaw.includes(',')
+					? 0.92
+					: confidence
 		});
 	}
 
@@ -672,7 +679,7 @@ export function parseStaffImport(input: ParseInput): StaffImportPreview {
 						pendingPatternDecisions: [],
 						detectedSourceType: 'list_text' as const
 					};
-			  })();
+				})();
 
 	if (preview.pendingPatternDecisions.length > 0) {
 		return preview;

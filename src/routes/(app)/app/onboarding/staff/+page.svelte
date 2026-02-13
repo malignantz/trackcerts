@@ -47,7 +47,8 @@
 			? (form.previewRows as PreviewRow[])
 			: [];
 
-	const showTestingTools = () => Boolean(data && 'showTestingTools' in data && data.showTestingTools);
+	const showTestingTools = () =>
+		Boolean(data && 'showTestingTools' in data && data.showTestingTools);
 
 	const buildPreviewSignature = (rows: PreviewRow[]) =>
 		rows
@@ -309,35 +310,35 @@
 </script>
 
 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-		<div class="flex flex-wrap items-start justify-between gap-4">
-			<div>
-				<h2 class="text-2xl font-semibold text-slate-900">Staff onboarding</h2>
-				<p class="mt-2 text-slate-600">
-					Import staff names in batches and assign required certifications.
-				</p>
-				{#if showTestingTools()}
-					<form
-						method="POST"
-						action="?/clearStaffTesting"
-						class="mt-3"
-						onsubmit={(event) => {
-							if (!confirm('Clear all staff for this org? This is intended for testing.')) {
-								event.preventDefault();
-							}
-						}}
+	<div class="flex flex-wrap items-start justify-between gap-4">
+		<div>
+			<h2 class="text-2xl font-semibold text-slate-900">Staff onboarding</h2>
+			<p class="mt-2 text-slate-600">
+				Import staff names in batches and assign required certifications.
+			</p>
+			{#if showTestingTools()}
+				<form
+					method="POST"
+					action="?/clearStaffTesting"
+					class="mt-3"
+					onsubmit={(event) => {
+						if (!confirm('Clear all staff for this org? This is intended for testing.')) {
+							event.preventDefault();
+						}
+					}}
+				>
+					<button
+						type="submit"
+						class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
 					>
-						<button
-							type="submit"
-							class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
-						>
-							Clear staff (testing)
-						</button>
-					</form>
-				{/if}
-			</div>
-			<a
-				href="/app/staff"
-				class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+						Clear staff (testing)
+					</button>
+				</form>
+			{/if}
+		</div>
+		<a
+			href="/app/staff"
+			class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
 		>
 			Return to staff list
 		</a>
@@ -388,7 +389,9 @@
 	{/if}
 
 	{#if form?.action === 'clearStaffTesting' && form?.success}
-		<p class="mt-4 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+		<p
+			class="mt-4 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+		>
 			Cleared {('clearedCount' in form && Number(form.clearedCount)) || 0} staff records.
 		</p>
 	{/if}
@@ -449,7 +452,10 @@
 								<div
 									class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900 transition peer-checked:ring-2 peer-checked:ring-emerald-500"
 								>
-									<p class="text-lg font-semibold">{pattern.sampleFirstToken} {pattern.sampleSecondToken}</p>
+									<p class="text-lg font-semibold">
+										{pattern.sampleFirstToken}
+										{pattern.sampleSecondToken}
+									</p>
 									<p class="mt-1 text-sm">Use this order.</p>
 								</div>
 							</label>
@@ -464,7 +470,10 @@
 								<div
 									class="rounded-xl border border-sky-300 bg-sky-50 p-4 text-sky-900 transition peer-checked:ring-2 peer-checked:ring-sky-500"
 								>
-									<p class="text-lg font-semibold">{pattern.sampleSecondToken} {pattern.sampleFirstToken}</p>
+									<p class="text-lg font-semibold">
+										{pattern.sampleSecondToken}
+										{pattern.sampleFirstToken}
+									</p>
 									<p class="mt-1 text-sm">Use this order.</p>
 								</div>
 							</label>
@@ -597,7 +606,11 @@
 											required
 											class="w-32 rounded border border-slate-300 px-2 py-1"
 											oninput={(event) =>
-												setRowField(row.id, 'firstName', (event.currentTarget as HTMLInputElement).value)}
+												setRowField(
+													row.id,
+													'firstName',
+													(event.currentTarget as HTMLInputElement).value
+												)}
 										/>
 									</td>
 									{#if showMiddleColumn()}
@@ -625,7 +638,11 @@
 											required
 											class="w-32 rounded border border-slate-300 px-2 py-1"
 											oninput={(event) =>
-												setRowField(row.id, 'lastName', (event.currentTarget as HTMLInputElement).value)}
+												setRowField(
+													row.id,
+													'lastName',
+													(event.currentTarget as HTMLInputElement).value
+												)}
 										/>
 									</td>
 									<td class="px-3 py-2">
