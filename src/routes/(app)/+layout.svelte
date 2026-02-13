@@ -3,10 +3,7 @@
 
 	let { children, data } = $props();
 
-	const nav = [
-		{ href: '/app/staff', label: 'Staff' },
-		{ href: '/app/settings/certifications', label: 'Certifications' }
-	];
+	const nav = [{ href: '/app/staff', label: 'Staff' }];
 </script>
 
 <div class="min-h-screen p-4 md:p-8">
@@ -19,6 +16,9 @@
 						{data.membership?.organizationName ?? 'Organization setup'}
 					</h1>
 					<p class="text-sm text-slate-600">{data.userEmail}</p>
+					{#if data.membership?.organizationSiteCode}
+						<p class="text-xs text-slate-500">Site code: {data.membership.organizationSiteCode}</p>
+					{/if}
 				</div>
 
 				<form method="POST" action="/app/logout">

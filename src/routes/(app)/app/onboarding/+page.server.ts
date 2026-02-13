@@ -5,11 +5,15 @@ import { canUserBootstrapOrganization } from '$lib/server/auth/memberships';
 import { logAccessDenied } from '$lib/server/audit/logger';
 import { isUniqueViolation } from '$lib/server/db/errors';
 import { createOrganizationForOwner, organizationSlugExists } from '$lib/server/org/service';
+import { ensureFixedCertificationTypes } from '$lib/server/org/certification-types';
 import { deriveOrganizationSlug, normalizeOrganizationSlug } from '$lib/server/org/slug';
 import { createOrganizationSchema } from '$lib/validation/organization';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.membership) {
+		if (!locals.membership.staffOnboardingComplete) {
+			throw redirect(303, '/app/onboarding/staff');
+		}
 		throw redirect(303, '/app/staff');
 	}
 
@@ -78,12 +82,13 @@ export const actions: Actions = {
 		}
 
 		try {
-			await createOrganizationForOwner({
+			const organization = await createOrganizationForOwner({
 				userId: locals.user.id,
 				email: locals.user.email,
 				name: parsed.data.name,
 				slug: candidateSlug
 			});
+			await ensureFixedCertificationTypes(organization.organizationId);
 		} catch (error) {
 			if (isUniqueViolation(error, 'organizations_slug_unique')) {
 				return fail(409, {
@@ -96,6 +101,6 @@ export const actions: Actions = {
 			throw error;
 		}
 
-		throw redirect(303, '/app/staff');
+		throw redirect(303, '/app/onboarding/staff');
 	}
 };

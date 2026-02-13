@@ -6,6 +6,7 @@ describe('createStaffSchema', () => {
 	it('accepts valid names', () => {
 		const parsed = createStaffSchema.safeParse({
 			firstName: 'Ana-Maria',
+			middleName: 'Q',
 			lastName: "O'Neil"
 		});
 
@@ -15,6 +16,7 @@ describe('createStaffSchema', () => {
 	it('rejects numeric names', () => {
 		const parsed = createStaffSchema.safeParse({
 			firstName: 'John2',
+			middleName: '',
 			lastName: 'Smith'
 		});
 

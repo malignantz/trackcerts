@@ -5,5 +5,7 @@ export interface ActiveMembership {
 	organizationId: string;
 	organizationName: string;
 	organizationSlug: string;
+	organizationSiteCode: string;
+	staffOnboardingComplete: boolean;
 	role: Role;
 }

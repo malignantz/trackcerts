@@ -28,6 +28,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const parsed = updateStaffSchema.safeParse({
 			firstName: formData.get('firstName'),
+			middleName: formData.get('middleName'),
 			lastName: formData.get('lastName'),
 			isActive: formData.get('isActive') === 'on'
 		});
@@ -54,6 +55,7 @@ export const actions: Actions = {
 
 		await updateStaffRecord(locals.membership.organizationId, params.id, {
 			firstName: record.firstName,
+			middleName: record.middleName ?? null,
 			lastName: record.lastName,
 			isActive: false
 		});

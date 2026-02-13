@@ -98,7 +98,7 @@ async function createOrganizationFixture() {
 
 	const db = getDb();
 	const [organization] = await db
-		.select({ id: organizations.id, slug: organizations.slug })
+		.select({ id: organizations.id, slug: organizations.slug, siteCode: organizations.siteCode })
 		.from(organizations)
 		.where(eq(organizations.slug, tag))
 		.limit(1);
@@ -109,11 +109,12 @@ async function createOrganizationFixture() {
 
 	return {
 		organizationId: organization.id,
+		siteCode: organization.siteCode,
 		userId
 	};
 }
 
-async function createSubmissionFixture(organizationId: string) {
+async function createSubmissionFixture(organizationId: string, sourceSiteCode: string) {
 	const db = getDb();
 	const [staffRecord] = await db
 		.insert(staff)
@@ -132,6 +133,9 @@ async function createSubmissionFixture(organizationId: string) {
 			staffId: staffRecord.id,
 			submittedFirstName: 'Nina',
 			submittedLastName: 'Diaz',
+			submittedEmail: null,
+			intakeMethod: 'ecard_direct',
+			sourceSiteCode,
 			status: 'pending'
 		})
 		.returning({ id: submissions.id });
@@ -292,8 +296,14 @@ describe.sequential('phase 1 db-backed integration', () => {
 	it('dispatch endpoint enforces auth and organization ownership', async () => {
 		const firstOrg = await createOrganizationFixture();
 		const secondOrg = await createOrganizationFixture();
-		const firstSubmission = await createSubmissionFixture(firstOrg.organizationId);
-		const secondSubmission = await createSubmissionFixture(secondOrg.organizationId);
+		const firstSubmission = await createSubmissionFixture(
+			firstOrg.organizationId,
+			firstOrg.siteCode
+		);
+		const secondSubmission = await createSubmissionFixture(
+			secondOrg.organizationId,
+			secondOrg.siteCode
+		);
 
 		await expect(
 			dispatchSubmission({

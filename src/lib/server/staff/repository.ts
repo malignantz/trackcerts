@@ -15,6 +15,7 @@ export async function listStaff(input: ListStaffInput) {
 		.select({
 			id: staff.id,
 			firstName: staff.firstName,
+			middleName: staff.middleName,
 			lastName: staff.lastName,
 			isActive: staff.isActive,
 			createdAt: staff.createdAt
@@ -42,6 +43,7 @@ export async function getStaffById(organizationId: string, staffId: string) {
 		.select({
 			id: staff.id,
 			firstName: staff.firstName,
+			middleName: staff.middleName,
 			lastName: staff.lastName,
 			isActive: staff.isActive
 		})
@@ -57,6 +59,7 @@ export async function createStaffRecord(organizationId: string, input: CreateSta
 	await db.insert(staff).values({
 		organizationId,
 		firstName: input.firstName,
+		middleName: input.middleName?.trim() || null,
 		lastName: input.lastName,
 		isActive: true
 	});
@@ -72,9 +75,65 @@ export async function updateStaffRecord(
 		.update(staff)
 		.set({
 			firstName: input.firstName,
+			middleName: input.middleName?.trim() || null,
 			lastName: input.lastName,
 			isActive: input.isActive,
 			updatedAt: new Date()
 		})
 		.where(and(eq(staff.organizationId, organizationId), eq(staff.id, staffId)));
+}
+
+interface StaffNameMatchInput {
+	organizationId: string;
+	firstName: string;
+	lastName: string;
+	middleName?: string | null;
+	activeOnly?: boolean;
+}
+
+export async function findStaffByName(input: StaffNameMatchInput) {
+	const db = getDb();
+	const normalizedMiddle = input.middleName?.trim();
+	return db
+		.select({
+			id: staff.id,
+			firstName: staff.firstName,
+			middleName: staff.middleName,
+			lastName: staff.lastName,
+			isActive: staff.isActive
+		})
+		.from(staff)
+		.where(
+			and(
+				eq(staff.organizationId, input.organizationId),
+				ilike(staff.firstName, input.firstName.trim()),
+				ilike(staff.lastName, input.lastName.trim()),
+				normalizedMiddle ? ilike(staff.middleName, normalizedMiddle) : undefined,
+				input.activeOnly ? eq(staff.isActive, true) : undefined
+			)
+		)
+		.orderBy(asc(staff.lastName), asc(staff.firstName), asc(staff.middleName));
+}
+
+export async function listPotentialNameCollisions(
+	organizationId: string,
+	firstName: string,
+	lastName: string
+) {
+	const db = getDb();
+	return db
+		.select({
+			id: staff.id,
+			firstName: staff.firstName,
+			middleName: staff.middleName,
+			lastName: staff.lastName
+		})
+		.from(staff)
+		.where(
+			and(
+				eq(staff.organizationId, organizationId),
+				ilike(staff.firstName, firstName.trim()),
+				ilike(staff.lastName, lastName.trim())
+			)
+		);
 }

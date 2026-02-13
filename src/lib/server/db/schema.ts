@@ -14,6 +14,8 @@ import {
 
 export const roleEnum = pgEnum('role', ['owner', 'manager']);
 export const jobStatusEnum = pgEnum('job_status', ['pending', 'processing', 'verified', 'failed']);
+export const certificationCodeEnum = pgEnum('certification_code', ['ACLS', 'BLS', 'PALS']);
+export const intakeMethodEnum = pgEnum('intake_method', ['ecard_direct', 'email_lookup']);
 
 export const organizations = pgTable(
 	'organizations',
@@ -21,10 +23,15 @@ export const organizations = pgTable(
 		id: uuid('id').defaultRandom().primaryKey(),
 		name: text('name').notNull(),
 		slug: text('slug').notNull(),
+		siteCode: text('site_code').notNull(),
+		staffOnboardingComplete: boolean('staff_onboarding_complete').notNull().default(false),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 	},
-	(table) => [unique('organizations_slug_unique').on(table.slug)]
+	(table) => [
+		unique('organizations_slug_unique').on(table.slug),
+		unique('organizations_site_code_unique').on(table.siteCode)
+	]
 );
 
 export const userProfiles = pgTable(
@@ -83,6 +90,7 @@ export const staff = pgTable(
 			.notNull()
 			.references(() => organizations.id, { onDelete: 'cascade' }),
 		firstName: text('first_name').notNull(),
+		middleName: text('middle_name'),
 		lastName: text('last_name').notNull(),
 		isActive: boolean('is_active').notNull().default(true),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -103,11 +111,35 @@ export const submissions = pgTable('submissions', {
 		.references(() => staff.id, { onDelete: 'restrict' }),
 	submittedFirstName: text('submitted_first_name').notNull(),
 	submittedLastName: text('submitted_last_name').notNull(),
+	submittedEmail: text('submitted_email'),
+	intakeMethod: intakeMethodEnum('intake_method').notNull(),
+	sourceSiteCode: text('source_site_code').notNull(),
 	status: jobStatusEnum('status').notNull().default('pending'),
 	submittedAt: timestamp('submitted_at', { withTimezone: true }).defaultNow().notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 });
+
+export const staffCertificationRequirements = pgTable(
+	'staff_certification_requirements',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		organizationId: uuid('organization_id')
+			.notNull()
+			.references(() => organizations.id, { onDelete: 'cascade' }),
+		staffId: uuid('staff_id')
+			.notNull()
+			.references(() => staff.id, { onDelete: 'cascade' }),
+		certCode: certificationCodeEnum('cert_code').notNull(),
+		isRequired: boolean('is_required').notNull().default(true),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [
+		unique('staff_certification_requirements_staff_cert_unique').on(table.staffId, table.certCode),
+		index('staff_certification_requirements_org_staff_idx').on(table.organizationId, table.staffId)
+	]
+);
 
 export const ecardEntries = pgTable('ecard_entries', {
 	id: uuid('id').defaultRandom().primaryKey(),
@@ -170,5 +202,6 @@ export const auditLogs = pgTable('audit_logs', {
 export const organizationsRelations = relations(organizations, ({ many }) => ({
 	memberships: many(organizationMemberships),
 	staff: many(staff),
-	certificationTypes: many(certificationTypes)
+	certificationTypes: many(certificationTypes),
+	staffCertificationRequirements: many(staffCertificationRequirements)
 }));

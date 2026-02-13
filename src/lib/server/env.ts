@@ -6,7 +6,9 @@ const serverEnvSchema = z.object({
 	SUPABASE_ANON_KEY: z.string().min(1),
 	SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 	DATABASE_URL: z.string().min(1),
-	APP_URL: z.url()
+	APP_URL: z.url(),
+	DEV_DB_MODE: z.enum(['remote', 'local']).optional(),
+	LOCAL_DATABASE_URL: z.string().min(1).optional()
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -18,7 +20,9 @@ const testDefaults: ServerEnv = {
 	SUPABASE_ANON_KEY: 'test-anon-key',
 	SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
 	DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/trackcerts',
-	APP_URL: 'http://localhost:5173'
+	APP_URL: 'http://localhost:5173',
+	DEV_DB_MODE: 'local',
+	LOCAL_DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/trackcerts'
 };
 
 export function getServerEnv(): ServerEnv {

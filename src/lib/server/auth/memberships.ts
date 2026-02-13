@@ -39,6 +39,8 @@ export async function getActiveMembershipForUser(userId: string): Promise<Active
 			organizationId: organizations.id,
 			organizationName: organizations.name,
 			organizationSlug: organizations.slug,
+			organizationSiteCode: organizations.siteCode,
+			staffOnboardingComplete: organizations.staffOnboardingComplete,
 			role: organizationMemberships.role
 		})
 		.from(organizationMemberships)
@@ -57,6 +59,8 @@ export async function getActiveMembershipForUser(userId: string): Promise<Active
 		organizationId: record.organizationId,
 		organizationName: record.organizationName,
 		organizationSlug: record.organizationSlug,
+		organizationSiteCode: record.organizationSiteCode,
+		staffOnboardingComplete: record.staffOnboardingComplete,
 		role: record.role as MembershipRole
 	};
 }

@@ -17,6 +17,17 @@
 		</label>
 
 		<label class="block">
+			<span class="mb-1 block text-sm font-medium text-slate-700"
+				>Middle name / initial (optional)</span
+			>
+			<input
+				name="middleName"
+				value={data.record.middleName ?? ''}
+				class="w-full rounded-lg border border-slate-300 px-3 py-2"
+			/>
+		</label>
+
+		<label class="block">
 			<span class="mb-1 block text-sm font-medium text-slate-700">Last name</span>
 			<input
 				name="lastName"

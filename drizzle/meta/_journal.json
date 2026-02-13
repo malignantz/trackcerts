@@ -8,6 +8,13 @@
       "when": 1770870414198,
       "tag": "0000_nosy_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770925645187,
+      "tag": "0001_glossy_dazzler",
+      "breakpoints": true
     }
   ]
 }

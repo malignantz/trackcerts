@@ -55,6 +55,11 @@ const DATABASE_URL = requireEnv('DATABASE_URL');
 
 const SEED_ORGANIZATION_NAME = process.env.SEED_ORGANIZATION_NAME ?? 'Mercy General Hospital';
 const SEED_ORGANIZATION_SLUG = process.env.SEED_ORGANIZATION_SLUG ?? 'mercy-general';
+const SEED_SITE_CODE =
+	process.env.SEED_SITE_CODE ??
+	SEED_ORGANIZATION_SLUG.replace(/[^a-z0-9]/gi, '')
+		.slice(0, 8)
+		.toLowerCase();
 const SEED_OWNER_USER_ID = process.env.SEED_OWNER_USER_ID;
 const SEED_OWNER_EMAIL = process.env.SEED_OWNER_EMAIL ?? 'owner@mercy-general.test';
 
@@ -80,12 +85,16 @@ async function seed() {
 		await client.query('BEGIN');
 
 		const orgResult = await client.query(
-			`INSERT INTO organizations (name, slug)
-			 VALUES ($1, $2)
+			`INSERT INTO organizations (name, slug, site_code, staff_onboarding_complete)
+			 VALUES ($1, $2, $3, TRUE)
 			 ON CONFLICT (slug)
-			 DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
+			 DO UPDATE SET
+				name = EXCLUDED.name,
+				site_code = EXCLUDED.site_code,
+				staff_onboarding_complete = TRUE,
+				updated_at = NOW()
 			 RETURNING id`,
-			[SEED_ORGANIZATION_NAME, SEED_ORGANIZATION_SLUG]
+			[SEED_ORGANIZATION_NAME, SEED_ORGANIZATION_SLUG, SEED_SITE_CODE]
 		);
 		const organizationId = orgResult.rows[0].id;
 
@@ -146,6 +155,7 @@ async function seed() {
 
 		console.log('Seed complete');
 		console.log(`- organization: ${SEED_ORGANIZATION_NAME} (${SEED_ORGANIZATION_SLUG})`);
+		console.log(`- site code: ${SEED_SITE_CODE}`);
 		console.log(`- certification types upserted: ${certificationUpserts}`);
 		console.log(`- staff inserted: ${insertedStaff}`);
 		if (SEED_OWNER_USER_ID) {

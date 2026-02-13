@@ -17,6 +17,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const parsed = createStaffSchema.safeParse({
 			firstName: formData.get('firstName'),
+			middleName: formData.get('middleName'),
 			lastName: formData.get('lastName')
 		});
 
@@ -24,6 +25,7 @@ export const actions: Actions = {
 			return fail(400, {
 				error: parsed.error.issues[0]?.message ?? 'Invalid input',
 				firstName: String(formData.get('firstName') ?? ''),
+				middleName: String(formData.get('middleName') ?? ''),
 				lastName: String(formData.get('lastName') ?? '')
 			});
 		}
