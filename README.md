@@ -100,6 +100,20 @@ npm run test
 npm run test:e2e
 ```
 
+## Worker commands
+
+Run the async verification worker once:
+
+```bash
+npm run worker:once
+```
+
+Run the polling worker loop:
+
+```bash
+npm run worker:run
+```
+
 ## Migration workflow
 
 - Schema source of truth: `src/lib/server/db/schema.ts`

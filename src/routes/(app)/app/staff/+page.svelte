@@ -4,6 +4,65 @@
 	let { data, form } = $props();
 
 	const isSelected = (code: string) => data.selectedFilters.includes(code);
+
+	type RequirementVisualState =
+		| 'required_verified'
+		| 'required_unverified'
+		| 'optional_verified'
+		| 'optional_unverified';
+
+	const requirementStateOrder: RequirementVisualState[] = [
+		'required_verified',
+		'required_unverified',
+		'optional_unverified',
+		'optional_verified'
+	];
+
+	const requirementStateMeta: Record<
+		RequirementVisualState,
+		{ icon: string; label: string; title: string; className: string }
+	> = {
+		required_verified: {
+			icon: '☑',
+			label: 'Required + Verified',
+			title: 'Required and verified',
+			className: 'border-emerald-500 bg-emerald-100 text-emerald-900'
+		},
+		required_unverified: {
+			icon: '☐',
+			label: 'Required',
+			title: 'Required and not yet verified',
+			className: 'border-rose-300 bg-rose-100 text-rose-900'
+		},
+		optional_unverified: {
+			icon: '—',
+			label: 'Not Required',
+			title: 'Not required',
+			className: 'border-slate-300 bg-slate-200 text-slate-600'
+		},
+		optional_verified: {
+			icon: '☑',
+			label: 'Not Required + Verified',
+			title: 'Not required but verified',
+			className: 'border-slate-400 bg-slate-200 text-slate-700'
+		}
+	};
+
+	const getRequirementState = (
+		isRequired: boolean,
+		isVerified: boolean
+	): RequirementVisualState => {
+		if (isRequired && isVerified) {
+			return 'required_verified';
+		}
+		if (isRequired) {
+			return 'required_unverified';
+		}
+		if (isVerified) {
+			return 'optional_verified';
+		}
+		return 'optional_unverified';
+	};
 </script>
 
 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -44,6 +103,17 @@
 			{form.error}
 		</p>
 	{/if}
+
+	<div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+		<span class="text-slate-500">Legend:</span>
+		{#each requirementStateOrder as state}
+			{@const meta = requirementStateMeta[state]}
+			<span class={`inline-flex items-center gap-1 rounded border px-2 py-1 ${meta.className}`}>
+				<span aria-hidden="true" class="font-semibold">{meta.icon}</span>
+				<span>{meta.label}</span>
+			</span>
+		{/each}
+	</div>
 
 	<div class="mt-6 overflow-x-auto">
 		<table class="min-w-full divide-y divide-slate-200">
@@ -92,6 +162,8 @@
 								</span>
 							</td>
 							{#each FIXED_CERTIFICATION_CODES as certCode}
+								{@const state = getRequirementState(row.required[certCode], row.verified[certCode])}
+								{@const meta = requirementStateMeta[state]}
 								<td class="py-3 align-top">
 									<form method="POST" action="?/toggleRequirement">
 										<input type="hidden" name="staffId" value={row.id} />
@@ -102,23 +174,11 @@
 											value={row.required[certCode] ? 'true' : 'false'}
 										/>
 										<button
-											class="inline-flex items-center gap-1 rounded border px-2 py-1 text-xs {row
-												.required[certCode]
-												? row.verified[certCode]
-													? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-													: 'border-amber-400 bg-amber-50 text-amber-800'
-												: 'border-slate-300 text-slate-500'}"
-											title={row.required[certCode]
-												? row.verified[certCode]
-													? 'Required and verified'
-													: 'Required and not yet verified'
-												: 'Not required'}
+											class={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs transition-colors ${meta.className}`}
+											title={meta.title}
 										>
-											{#if row.required[certCode]}
-												<span>{row.verified[certCode] ? '●✓' : '●'}</span>
-											{:else}
-												<span>○</span>
-											{/if}
+											<span aria-hidden="true" class="font-semibold">{meta.icon}</span>
+											<span>{meta.label}</span>
 										</button>
 									</form>
 								</td>

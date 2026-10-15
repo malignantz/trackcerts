@@ -1,15 +1,21 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { chunkEntries, MAX_ECARD_BATCH_SIZE } from './verification-dispatcher';
+const enqueueSubmissionJobsMock = vi.fn();
 
-describe('chunkEntries', () => {
-	it('splits arrays into max 20-sized chunks', () => {
-		const values = Array.from({ length: 45 }, (_, index) => index + 1);
-		const chunks = chunkEntries(values, MAX_ECARD_BATCH_SIZE);
+vi.mock('$lib/server/worker/repository', () => ({
+	enqueueSubmissionJobs: enqueueSubmissionJobsMock
+}));
 
-		expect(chunks).toHaveLength(3);
-		expect(chunks[0]).toHaveLength(20);
-		expect(chunks[1]).toHaveLength(20);
-		expect(chunks[2]).toHaveLength(5);
+describe('verificationDispatcher', () => {
+	beforeEach(() => {
+		enqueueSubmissionJobsMock.mockReset();
+	});
+
+	it('enqueues submission jobs via repository', async () => {
+		const { verificationDispatcher } = await import('./verification-dispatcher');
+		await verificationDispatcher.enqueueSubmission('sub-123');
+
+		expect(enqueueSubmissionJobsMock).toHaveBeenCalledTimes(1);
+		expect(enqueueSubmissionJobsMock).toHaveBeenCalledWith('sub-123');
 	});
 });

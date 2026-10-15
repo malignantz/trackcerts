@@ -436,7 +436,18 @@ describe.sequential('phase 2 onboarding and verify integration', () => {
 			.from(ecardEntries)
 			.where(eq(ecardEntries.submissionId, submission.id));
 		expect(entryRows).toHaveLength(2);
-		expect(entryRows.every((row) => row.status === 'verified')).toBe(true);
+		expect(entryRows.every((row) => row.status === 'pending')).toBe(true);
+
+		const jobRows = await db
+			.select({
+				jobType: verificationJobs.jobType,
+				status: verificationJobs.status
+			})
+			.from(verificationJobs)
+			.where(eq(verificationJobs.submissionId, submission.id));
+		expect(jobRows).toHaveLength(2);
+		expect(jobRows.every((row) => row.jobType === 'verify_ecard')).toBe(true);
+		expect(jobRows.every((row) => row.status === 'pending')).toBe(true);
 	});
 
 	it('verify lookupByEmail stores email and rejects ambiguous duplicate names without middle', async () => {
@@ -500,6 +511,7 @@ describe.sequential('phase 2 onboarding and verify integration', () => {
 
 		const [submission] = await getDb()
 			.select({
+				id: submissions.id,
 				submittedEmail: submissions.submittedEmail,
 				intakeMethod: submissions.intakeMethod
 			})
@@ -511,5 +523,24 @@ describe.sequential('phase 2 onboarding and verify integration', () => {
 			submittedEmail: 'jamie@example.test',
 			intakeMethod: 'email_lookup'
 		});
+
+		const lookupJobs = await getDb()
+			.select({
+				jobType: verificationJobs.jobType,
+				status: verificationJobs.status
+			})
+			.from(verificationJobs)
+			.where(eq(verificationJobs.submissionId, submission.id));
+		expect(lookupJobs).toHaveLength(1);
+		expect(lookupJobs[0]).toMatchObject({
+			jobType: 'lookup_name_email',
+			status: 'pending'
+		});
+
+		const createdEntries = await getDb()
+			.select({ id: ecardEntries.id })
+			.from(ecardEntries)
+			.where(eq(ecardEntries.submissionId, submission.id));
+		expect(createdEntries).toHaveLength(0);
 	});
 });

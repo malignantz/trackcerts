@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 	await verificationDispatcher.enqueueSubmission(submission.id);
 
 	return json({
-		status: 'queued_stub',
+		status: 'queued',
 		submissionId: submission.id
 	});
 };

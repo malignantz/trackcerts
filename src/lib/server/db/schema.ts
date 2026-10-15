@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
 	boolean,
 	index,
@@ -9,11 +9,16 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid
 } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['owner', 'manager']);
 export const jobStatusEnum = pgEnum('job_status', ['pending', 'processing', 'verified', 'failed']);
+export const verificationJobTypeEnum = pgEnum('verification_job_type', [
+	'verify_ecard',
+	'lookup_name_email'
+]);
 export const certificationCodeEnum = pgEnum('certification_code', ['ACLS', 'BLS', 'PALS']);
 export const intakeMethodEnum = pgEnum('intake_method', ['ecard_direct', 'email_lookup']);
 
@@ -150,25 +155,47 @@ export const ecardEntries = pgTable('ecard_entries', {
 		onDelete: 'set null'
 	}),
 	ecardCode: text('ecard_code').notNull(),
+	providerCertLabel: text('provider_cert_label'),
 	status: jobStatusEnum('status').notNull().default('pending'),
 	lastError: text('last_error'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 });
 
-export const verificationJobs = pgTable('verification_jobs', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	ecardEntryId: uuid('ecard_entry_id')
-		.notNull()
-		.references(() => ecardEntries.id, { onDelete: 'cascade' }),
-	status: jobStatusEnum('status').notNull().default('pending'),
-	attemptCount: integer('attempt_count').notNull().default(0),
-	queuedAt: timestamp('queued_at', { withTimezone: true }).defaultNow().notNull(),
-	startedAt: timestamp('started_at', { withTimezone: true }),
-	finishedAt: timestamp('finished_at', { withTimezone: true }),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
-});
+export const verificationJobs = pgTable(
+	'verification_jobs',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		jobType: verificationJobTypeEnum('job_type').notNull(),
+		submissionId: uuid('submission_id')
+			.notNull()
+			.references(() => submissions.id, { onDelete: 'cascade' }),
+		ecardEntryId: uuid('ecard_entry_id').references(() => ecardEntries.id, { onDelete: 'cascade' }),
+		status: jobStatusEnum('status').notNull().default('pending'),
+		attemptCount: integer('attempt_count').notNull().default(0),
+		lastError: text('last_error'),
+		errorCategory: text('error_category'),
+		claimedBy: text('claimed_by'),
+		queuedAt: timestamp('queued_at', { withTimezone: true }).defaultNow().notNull(),
+		startedAt: timestamp('started_at', { withTimezone: true }),
+		finishedAt: timestamp('finished_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [
+		index('verification_jobs_status_queued_idx').on(table.status, table.queuedAt),
+		uniqueIndex('verification_jobs_verify_active_unique')
+			.on(table.ecardEntryId)
+			.where(
+				sql`${table.jobType} = 'verify_ecard' and ${table.status} in ('pending', 'processing') and ${table.ecardEntryId} is not null`
+			),
+		uniqueIndex('verification_jobs_lookup_active_unique')
+			.on(table.submissionId)
+			.where(
+				sql`${table.jobType} = 'lookup_name_email' and ${table.status} in ('pending', 'processing')`
+			)
+	]
+);
 
 export const documents = pgTable('documents', {
 	id: uuid('id').defaultRandom().primaryKey(),

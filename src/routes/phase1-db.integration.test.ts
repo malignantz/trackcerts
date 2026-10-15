@@ -341,7 +341,7 @@ describe.sequential('phase 1 db-backed integration', () => {
 
 		expect(response.status).toBe(200);
 		await expect(response.json()).resolves.toMatchObject({
-			status: 'queued_stub',
+			status: 'queued',
 			submissionId: firstSubmission.submissionId
 		});
 	});

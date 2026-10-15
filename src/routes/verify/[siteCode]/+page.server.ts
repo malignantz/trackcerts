@@ -6,7 +6,6 @@ import { getOrganizationBySiteCode } from '$lib/server/org/service';
 import { findStaffByName } from '$lib/server/staff/repository';
 import { getRequiredCertCodesForStaff } from '$lib/server/staff/requirements';
 import { createSubmissionWithEcards } from '$lib/server/submissions/service';
-import { ecardProviderClient } from '$lib/server/services/ecard-provider';
 import { verificationDispatcher } from '$lib/server/services/verification-dispatcher';
 import { lookupByEmailSchema } from '$lib/validation/verify';
 import { createStaffSchema } from '$lib/validation/staff';
@@ -186,24 +185,6 @@ export const actions: Actions = {
 			});
 		}
 
-		const lookupResults = await ecardProviderClient.lookupEcardsByNameEmail({
-			organizationId: organization.id,
-			siteCode: organization.siteCode,
-			firstName: parsed.data.firstName,
-			middleName: parsed.data.middleName,
-			lastName: parsed.data.lastName,
-			email: parsed.data.email
-		});
-
-		const resultMap = new Map(lookupResults.map((row) => [row.certCode, row.ecardCode]));
-		const missing = requiredCertCodes.filter((certCode) => !resultMap.get(certCode));
-		if (missing.length > 0) {
-			return fail(400, {
-				action: 'lookupByEmail',
-				error: `Could not find eCard codes for: ${missing.join(', ')}`
-			});
-		}
-
 		const submissionId = await createSubmissionWithEcards({
 			organizationId: organization.id,
 			staffId: resolved.staff.id,
@@ -212,10 +193,7 @@ export const actions: Actions = {
 			submittedEmail: parsed.data.email,
 			intakeMethod: 'email_lookup',
 			sourceSiteCode: organization.siteCode,
-			ecardCodes: requiredCertCodes.map((certCode) => ({
-				certCode,
-				ecardCode: resultMap.get(certCode) ?? ''
-			}))
+			ecardCodes: []
 		});
 		await verificationDispatcher.enqueueSubmission(submissionId);
 

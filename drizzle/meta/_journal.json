@@ -15,6 +15,13 @@
       "when": 1770925645187,
       "tag": "0001_glossy_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770951127636,
+      "tag": "0002_bored_zarek",
+      "breakpoints": true
     }
   ]
 }
